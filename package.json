@@ -1,0 +1,12 @@
+{
+  "name": "firstbackend",
+  "version": "1.0.0",
+  "description": "First Backend Project Just For Learning ",
+  "license": "ISC",
+  "author": "Raushan Kumar",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
