@@ -2,7 +2,7 @@
 
 import User from "../models/user.model.js";
 
-export const RegisterUser = async (req, res) => {
+export const RegisterUser = async (req, res,next) => {
     try {
         const {
             fullName,
@@ -14,25 +14,23 @@ export const RegisterUser = async (req, res) => {
         } = req.body;
 
         if (!fullName || !email || !gender || !dob || !phone || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
+                  const error = new Error("All fields Required");
+                    error.statusCode = 400;
+                    return next(error);
         }
 
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: "Email already exists",
-            });
+           const error = new Error("Email already registred");
+            error.statusCode = 409;
+            return next(error);
         }
 
        const photoUrl = `https://placehold.co/600x400?text=${fullName.charAt(0).toUpperCase()}`;
 
         const photo = {
-            url: photoURL,
+            url: photoUrl,
             publicID: null,
         };
 
@@ -47,19 +45,14 @@ export const RegisterUser = async (req, res) => {
         });
 
          res.status(201).json({
-            success: true,
             message: "User Registered Successfully",
             user: newUser,
         });
 
-    } catch (error) {
-        console.log(error);
-
-         res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-        });
-    }
+    } catch(error){
+    console.log(error);
+    next(error);
+}
 };
 
 export const Logout_user = (req, res) => {
@@ -68,8 +61,38 @@ export const Logout_user = (req, res) => {
     });
 };
 
-export const Login_user = (req, res) => {
-    res.json({
-        message: "Login Successfully from controller",
-    });
+export const Login_user = async (req, res,next) => {
+    
+    try{
+        const{email,password} = req.body;
+    
+        if(!email||!password)
+        {
+            const error = new Error("All fields Required");
+                    error.statusCode = 400;
+                    return next(error);
+        }
+
+        const existingUser = await User.findOne({email});
+         if (!existingUser) {
+           const error = new Error("User not found");
+            error.statusCode = 404;
+            return next(error);
+        }
+       //check password is correct 
+       if(password!==existingUser.password)
+       {
+           const error = new Error("Incorrect Password");
+            error.statusCode = 401;
+            return next(error);
+       }
+       res.status(200).json({
+         message :"Welcome back",
+         data:existingUser,
+       });
+    }
+   catch(error){
+    console.log(error);
+    next(error);
+}
 };
